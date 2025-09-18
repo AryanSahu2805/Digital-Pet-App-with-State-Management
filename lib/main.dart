@@ -15,6 +15,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  
+  // Text controller for name input
+  TextEditingController nameController = TextEditingController();
 
   void _playWithPet() {
     setState(() {
@@ -70,6 +73,16 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
+  // Simple function to change pet name
+  void _changePetName() {
+    setState(() {
+      if (nameController.text.isNotEmpty) {
+        petName = nameController.text;
+        nameController.clear(); // Clear the input field
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +98,28 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             Text(
               'Name: $petName',
               style: TextStyle(fontSize: 20.0),
+            ),
+            SizedBox(height: 8.0),
+            // Name Input Field
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  child: TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter pet name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _changePetName,
+                  child: Text('Set Name'),
+                ),
+              ],
             ),
             SizedBox(height: 8.0),
             // Mood Indicator
