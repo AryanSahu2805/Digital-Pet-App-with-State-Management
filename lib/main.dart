@@ -16,19 +16,23 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
-  bool isNameSet = false; // Track if name has been set
+  int energyLevel = 70; // New Energy Level
+  bool isNameSet = false;
 
-  String gameMessage = ""; // For Win/Loss messages
+  String gameMessage = "";
   Timer? hungerTimer;
   Timer? winTimer;
 
-  // Text controller for name input
   TextEditingController nameController = TextEditingController();
 
   void _playWithPet() {
     setState(() {
       happinessLevel += 10;
       if (happinessLevel > 100) happinessLevel = 100;
+
+      energyLevel -= 10; // Playing reduces energy
+      if (energyLevel < 0) energyLevel = 0;
+
       _updateHunger();
       _checkConditions();
     });
@@ -38,6 +42,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     setState(() {
       hungerLevel -= 10;
       if (hungerLevel < 0) hungerLevel = 0;
+
+      energyLevel += 5; // Feeding restores some energy
+      if (energyLevel > 100) energyLevel = 100;
+
       _updateHappiness();
       _checkConditions();
     });
@@ -58,18 +66,16 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     if (hungerLevel > 100) hungerLevel = 100;
   }
 
-  // Simple function to get pet color based on happiness
   Color getPetColor() {
     if (happinessLevel > 70) {
-      return Colors.green; // Happy
+      return Colors.green;
     } else if (happinessLevel >= 30) {
-      return Colors.yellow; // Neutral
+      return Colors.yellow;
     } else {
-      return Colors.red; // Unhappy
+      return Colors.red;
     }
   }
 
-  // Simple function to get mood text and emoji
   String getMoodText() {
     if (happinessLevel > 70) {
       return "Happy 😊";
@@ -80,30 +86,25 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
-  // Simple function to change pet name
   void _changePetName() {
     setState(() {
       if (nameController.text.isNotEmpty) {
         petName = nameController.text;
-        isNameSet = true; // Mark name as set
-        nameController.clear(); // Clear the input field
+        isNameSet = true;
+        nameController.clear();
       }
     });
   }
 
-  // Automatically increase hunger
   void _autoIncreaseHunger() {
     setState(() {
-      hungerLevel += 5; // Increase hunger by 5 every 30 seconds
-      if (hungerLevel > 100) hungerLevel = 100;
+      hungerLevel += 5;
       if (hungerLevel > 100) hungerLevel = 100;
       _checkConditions();
     });
   }
 
-  // Check Win/Loss conditions
   void _checkConditions() {
-    // Loss condition
     if (hungerLevel >= 100 && happinessLevel <= 10) {
       setState(() {
         gameMessage = "💀 Game Over! Your pet was too hungry and unhappy.";
@@ -112,9 +113,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       winTimer?.cancel();
     }
 
-    // Start/Reset win timer if happiness > 80
     if (happinessLevel > 80) {
-      winTimer?.cancel(); // reset if already running
+      winTimer?.cancel();
       winTimer = Timer(Duration(minutes: 3), () {
         setState(() {
           gameMessage = "🎉 You Win! Your pet stayed happy for 3 minutes!";
@@ -122,14 +122,13 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
         hungerTimer?.cancel();
       });
     } else {
-      winTimer?.cancel(); // stop win timer if happiness drops
+      winTimer?.cancel();
     }
   }
 
   @override
   void initState() {
     super.initState();
-    // Start hunger timer
     hungerTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       _autoIncreaseHunger();
     });
@@ -230,6 +229,25 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
                   color: Colors.black,
                 ),
               ),
+            SizedBox(height: 32.0),
+            // ✅ Energy Bar Widget
+            Text(
+              'Energy Level:',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 8.0),
+              child: LinearProgressIndicator(
+                value: energyLevel / 100,
+                backgroundColor: Colors.grey[300],
+                color: Colors.blue,
+                minHeight: 15,
+              ),
+            ),
+            Text(
+              '$energyLevel / 100',
+              style: TextStyle(fontSize: 16.0),
+            ),
           ],
         ),
       ),
