@@ -88,4 +88,3 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     );
   }
 }
-
