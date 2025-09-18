@@ -15,6 +15,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
+  bool isNameSet = false; // Track if name has been set
   
   // Text controller for name input
   TextEditingController nameController = TextEditingController();
@@ -78,6 +79,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     setState(() {
       if (nameController.text.isNotEmpty) {
         petName = nameController.text;
+        isNameSet = true; // Mark name as set
         nameController.clear(); // Clear the input field
       }
     });
@@ -100,28 +102,30 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 8.0),
-            // Name Input Field
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 150,
-                  child: TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter pet name',
-                      border: OutlineInputBorder(),
+            // Name Input Field (only show if name not set)
+            if (!isNameSet) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 150,
+                    child: TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter pet name',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _changePetName,
-                  child: Text('Set Name'),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.0),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _changePetName,
+                    child: Text('Set Name'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.0),
+            ],
             // Mood Indicator
             Text(
               'Mood: ${getMoodText()}',
