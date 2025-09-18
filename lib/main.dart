@@ -17,24 +17,29 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int happinessLevel = 50;
   int hungerLevel = 50;
   bool isNameSet = false; // Track if name has been set
-  
+
+  String gameMessage = ""; // For Win/Loss messages
+  Timer? hungerTimer;
+  Timer? winTimer;
+
   // Text controller for name input
   TextEditingController nameController = TextEditingController();
-  
-  // Timer for automatic hunger increase
-  Timer? hungerTimer;
 
   void _playWithPet() {
     setState(() {
       happinessLevel += 10;
+      if (happinessLevel > 100) happinessLevel = 100;
       _updateHunger();
+      _checkConditions();
     });
   }
 
   void _feedPet() {
     setState(() {
       hungerLevel -= 10;
+      if (hungerLevel < 0) hungerLevel = 0;
       _updateHappiness();
+      _checkConditions();
     });
   }
 
@@ -44,16 +49,13 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     } else {
       happinessLevel += 10;
     }
+    if (happinessLevel > 100) happinessLevel = 100;
+    if (happinessLevel < 0) happinessLevel = 0;
   }
 
   void _updateHunger() {
-    setState(() {
-      hungerLevel += 5;
-      if (hungerLevel > 100) {
-        hungerLevel = 100;
-        happinessLevel -= 20;
-      }
-    });
+    hungerLevel += 5;
+    if (hungerLevel > 100) hungerLevel = 100;
   }
 
   // Simple function to get pet color based on happiness
@@ -89,21 +91,45 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     });
   }
 
-  // Simple function to automatically increase hunger
+  // Automatically increase hunger
   void _autoIncreaseHunger() {
     setState(() {
       hungerLevel += 5; // Increase hunger by 5 every 30 seconds
-      if (hungerLevel > 100) {
-        hungerLevel = 100;
-        happinessLevel -= 10; // Pet gets unhappy if too hungry
-      }
+      if (hungerLevel > 100) hungerLevel = 100;
+      if (hungerLevel > 100) hungerLevel = 100;
+      _checkConditions();
     });
+  }
+
+  // Check Win/Loss conditions
+  void _checkConditions() {
+    // Loss condition
+    if (hungerLevel >= 100 && happinessLevel <= 10) {
+      setState(() {
+        gameMessage = "💀 Game Over! Your pet was too hungry and unhappy.";
+      });
+      hungerTimer?.cancel();
+      winTimer?.cancel();
+    }
+
+    // Start/Reset win timer if happiness > 80
+    if (happinessLevel > 80) {
+      winTimer?.cancel(); // reset if already running
+      winTimer = Timer(Duration(minutes: 3), () {
+        setState(() {
+          gameMessage = "🎉 You Win! Your pet stayed happy for 3 minutes!";
+        });
+        hungerTimer?.cancel();
+      });
+    } else {
+      winTimer?.cancel(); // stop win timer if happiness drops
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    // Start timer when app starts
+    // Start hunger timer
     hungerTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       _autoIncreaseHunger();
     });
@@ -111,8 +137,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
 
   @override
   void dispose() {
-    // Stop timer when app closes
     hungerTimer?.cancel();
+    winTimer?.cancel();
     nameController.dispose();
     super.dispose();
   }
@@ -120,10 +146,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: getPetColor(), // Background changes with mood
+      backgroundColor: getPetColor(),
       appBar: AppBar(
         title: Text('Digital Pet'),
-        backgroundColor: getPetColor().withOpacity(0.8), // AppBar matches background
+        backgroundColor: getPetColor().withOpacity(0.8),
       ),
       body: Center(
         child: Column(
@@ -134,7 +160,6 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 8.0),
-            // Name Input Field (only show if name not set)
             if (!isNameSet) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -158,13 +183,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               ),
               SizedBox(height: 8.0),
             ],
-            // Mood Indicator
             Text(
               'Mood: ${getMoodText()}',
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.0),
-            // Pet Image
             Image.asset(
               'assets/images/pet.png',
               width: 150,
@@ -183,14 +206,30 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             ),
             SizedBox(height: 32.0),
             ElevatedButton(
-              onPressed: _playWithPet,
+              onPressed: gameMessage.isEmpty ? _playWithPet : null,
               child: Text('Play with Your Pet'),
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: _feedPet,
+              onPressed: gameMessage.isEmpty ? _feedPet : null,
               child: Text('Feed Your Pet'),
             ),
+            SizedBox(height: 32.0),
+            Text(
+              'ℹ️ Hunger increases automatically every 30 seconds!',
+              style: TextStyle(fontSize: 14.0, fontStyle: FontStyle.italic),
+            ),
+            SizedBox(height: 16.0),
+            if (gameMessage.isNotEmpty)
+              Text(
+                gameMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
           ],
         ),
       ),
