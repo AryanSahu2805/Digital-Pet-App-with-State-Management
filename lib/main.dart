@@ -62,8 +62,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: getPetColor(), // Background changes with mood
       appBar: AppBar(
         title: Text('Digital Pet'),
+        backgroundColor: getPetColor().withOpacity(0.8), // AppBar matches background
       ),
       body: Center(
         child: Column(
@@ -74,21 +76,12 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 16.0),
-            // Pet Color Circle (changes based on happiness)
-            Container(
+            // Pet Image
+            Image.asset(
+              'assets/images/pet.png',
               width: 150,
               height: 150,
-              decoration: BoxDecoration(
-                color: getPetColor(),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 3),
-              ),
-              child: Center(
-                child: Text(
-                  '🐾',
-                  style: TextStyle(fontSize: 60),
-                ),
-              ),
+              fit: BoxFit.contain,
             ),
             SizedBox(height: 16.0),
             Text(
