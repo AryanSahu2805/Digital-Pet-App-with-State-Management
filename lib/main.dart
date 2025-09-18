@@ -48,6 +48,17 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     });
   }
 
+  // Simple function to get pet color based on happiness
+  Color getPetColor() {
+    if (happinessLevel > 70) {
+      return Colors.green; // Happy
+    } else if (happinessLevel >= 30) {
+      return Colors.yellow; // Neutral
+    } else {
+      return Colors.red; // Unhappy
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,12 +74,21 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 16.0),
-            // Pet Image
-            Image.asset(
-              'assets/images/pet.png',
+            // Pet Color Circle (changes based on happiness)
+            Container(
               width: 150,
               height: 150,
-              fit: BoxFit.contain,
+              decoration: BoxDecoration(
+                color: getPetColor(),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black, width: 3),
+              ),
+              child: Center(
+                child: Text(
+                  '🐾',
+                  style: TextStyle(fontSize: 60),
+                ),
+              ),
             ),
             SizedBox(height: 16.0),
             Text(
