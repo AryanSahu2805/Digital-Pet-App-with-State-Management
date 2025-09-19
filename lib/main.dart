@@ -16,7 +16,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
-  int energyLevel = 70; // New Energy Level
+  int energyLevel = 70; // ✅ Energy Level
   bool isNameSet = false;
 
   String gameMessage = "";
@@ -24,6 +24,20 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   Timer? winTimer;
 
   TextEditingController nameController = TextEditingController();
+
+  // ✅ Activity Selection State
+  String selectedActivity = "Play"; 
+  final List<String> activities = ["Play", "Feed", "Rest"];
+
+  void _performActivity() {
+    if (selectedActivity == "Play") {
+      _playWithPet();
+    } else if (selectedActivity == "Feed") {
+      _feedPet();
+    } else if (selectedActivity == "Rest") {
+      _restPet();
+    }
+  }
 
   void _playWithPet() {
     setState(() {
@@ -47,6 +61,19 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       if (energyLevel > 100) energyLevel = 100;
 
       _updateHappiness();
+      _checkConditions();
+    });
+  }
+
+  // ✅ New Rest Activity
+  void _restPet() {
+    setState(() {
+      energyLevel += 15; // Rest restores energy
+      if (energyLevel > 100) energyLevel = 100;
+
+      happinessLevel -= 5; // Resting may reduce fun
+      if (happinessLevel < 0) happinessLevel = 0;
+
       _checkConditions();
     });
   }
@@ -203,34 +230,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               'Hunger Level: $hungerLevel',
               style: TextStyle(fontSize: 20.0),
             ),
-            SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: gameMessage.isEmpty ? _playWithPet : null,
-              child: Text('Play with Your Pet'),
-            ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: gameMessage.isEmpty ? _feedPet : null,
-              child: Text('Feed Your Pet'),
-            ),
-            SizedBox(height: 32.0),
-            Text(
-              'ℹ️ Hunger increases automatically every 30 seconds!',
-              style: TextStyle(fontSize: 14.0, fontStyle: FontStyle.italic),
-            ),
-            SizedBox(height: 16.0),
-            if (gameMessage.isNotEmpty)
-              Text(
-                gameMessage,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            SizedBox(height: 32.0),
-            // ✅ Energy Bar Widget
             Text(
               'Energy Level:',
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
@@ -248,6 +248,48 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               '$energyLevel / 100',
               style: TextStyle(fontSize: 16.0),
             ),
+            SizedBox(height: 32.0),
+
+            // ✅ Activity Selection
+            Text(
+              'Choose an Activity:',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            DropdownButton<String>(
+              value: selectedActivity,
+              items: activities.map((String activity) {
+                return DropdownMenuItem<String>(
+                  value: activity,
+                  child: Text(activity),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedActivity = value!;
+                });
+              },
+            ),
+            ElevatedButton(
+              onPressed: gameMessage.isEmpty ? _performActivity : null,
+              child: Text('Do Activity'),
+            ),
+
+            SizedBox(height: 32.0),
+            Text(
+              'ℹ️ Hunger increases automatically every 30 seconds!',
+              style: TextStyle(fontSize: 14.0, fontStyle: FontStyle.italic),
+            ),
+            SizedBox(height: 16.0),
+            if (gameMessage.isNotEmpty)
+              Text(
+                gameMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
           ],
         ),
       ),
